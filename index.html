@@ -241,7 +241,15 @@
               // Clean up the URL so the token isn't visible to the user
               window.history.replaceState({}, document.title, "/");
           }
-         const response = await fetch(`${APP_CONFIG.API_BASE_URL}/api/auth/getmeJSON`, {
+    
+        document.addEventListener("DOMContentLoaded", async function () {
+           const urlParams = new URLSearchParams(window.location.hash.replace('#', '?'));
+           const bridgeToken = urlParams.get('bridgeToken');
+           if (bridgeToken) {
+               // Call the API to "exchange" this token for the actual profile data
+               await exchangeToken(bridgeToken);
+           }
+           const response = await fetch(`${APP_CONFIG.API_BASE_URL}/api/auth/getmeJSON`, {
                method: 'GET',
                credentials: 'include' // CRITICAL: This sends the cookie
            });
@@ -261,16 +269,6 @@
                }
            } else {
               window.location.href = `${APP_CONFIG.AUTH_URL}${APP_CONFIG.LOGIN_PAGE}`;
-           }
-        }
-
-        document.addEventListener("DOMContentLoaded", async function () {
-           const urlParams = new URLSearchParams(window.location.hash.replace('#', '?'));
-           const bridgeToken = urlParams.get('bridgeToken');
-           if (bridgeToken) {
-               // Call the API to "exchange" this token for the actual profile data
-               await exchangeToken(bridgeToken);
-              
            }
         });
 
