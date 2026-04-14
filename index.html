@@ -230,7 +230,7 @@
         }
 
         async function exchangeToken(token) {
-            const response = await fetch (`${APP_CONFIG.API_BASE_URL}/api/auth/verifyToken?t=${token}`, {
+            const response = await fetch (`${APP_CONFIG.API_BASE_URL}/api/auth/verifyToken?handshake=${token}`, {
                 credentials: 'include' // This ensures the API can see the original cookie
             });
             const data = await response.json();
@@ -258,7 +258,7 @@
                     // Map the JSON response to your local variable
                     // If UserProfile was a stringified JSON in the cookie, parse it here
                     try {
-                        console.log(data.UwerProfile);
+                        console.log(data.UserProfile);
                         AppSession.profile = JSON.parse(data.UserProfile);
                         AppSession.expiry = data.SessionExpiry;
                         getUserProfile();
