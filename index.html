@@ -241,6 +241,27 @@
               // Clean up the URL so the token isn't visible to the user
               window.history.replaceState({}, document.title, "/");
           }
+         const response = await fetch(`${APP_CONFIG.API_BASE_URL}/api/auth/getmeJSON`, {
+               method: 'GET',
+               credentials: 'include' // CRITICAL: This sends the cookie
+           });
+           if (response.ok) {
+               const data = await response.json();
+               // Map the JSON response to your local variable
+               // If UserProfile was a stringified JSON in the cookie, parse it here
+               try {
+                   console.log(data.UserProfile);
+                   AppSession.profile = JSON.parse(data.UserProfile);
+                   AppSession.expiry = data.SessionExpiry;
+                   getUserProfile();
+                   getExpiryTime();
+                   recordActivity();
+               } catch (e) {
+                   console.log(e.message);
+               }
+           } else {
+              window.location.href = `${APP_CONFIG.AUTH_URL}${APP_CONFIG.LOGIN_PAGE}`;
+           }
         }
 
         document.addEventListener("DOMContentLoaded", async function () {
@@ -249,27 +270,7 @@
            if (bridgeToken) {
                // Call the API to "exchange" this token for the actual profile data
                await exchangeToken(bridgeToken);
-               const response = await fetch(`${APP_CONFIG.API_BASE_URL}/api/auth/getmeJSON`, {
-                   method: 'GET',
-                   credentials: 'include' // CRITICAL: This sends the cookie
-               });
-               if (response.ok) {
-                   const data = await response.json();
-                   // Map the JSON response to your local variable
-                   // If UserProfile was a stringified JSON in the cookie, parse it here
-                   try {
-                       console.log(data.UserProfile);
-                       AppSession.profile = JSON.parse(data.UserProfile);
-                       AppSession.expiry = data.SessionExpiry;
-                       getUserProfile();
-                       getExpiryTime();
-                       recordActivity();
-                   } catch (e) {
-                       console.log(e.message);
-                   }
-               } else {
-                  window.location.href = `${APP_CONFIG.AUTH_URL}${APP_CONFIG.LOGIN_PAGE}`;
-               }
+              
            }
         });
 
