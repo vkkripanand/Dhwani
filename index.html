@@ -237,8 +237,11 @@
             })
                 .then(res => {
                     if (res.status === 200) {
+                        const data = await response.json();
                         // API saw the cookie and returned user info
                         console.log("User is authenticated");
+                        console.log("User Profile:", data.UserProfile);
+                        console.log("Expiry:", data.SessionExpiry);
                         getUserProfile();
                         getExpiryTime();
                         recordActivity();
