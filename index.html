@@ -244,7 +244,7 @@
         }
         
         document.addEventListener("DOMContentLoaded", async function () {
-            const urlParams = new URLSearchParams(window.location.search);
+            const urlParams = new URLSearchParams(window.location);
             const bridgeToken = urlParams.get('bridgeToken');
             if (bridgeToken) {
                 // Call the API to "exchange" this token for the actual profile data
