@@ -230,22 +230,20 @@
         }
 
         document.addEventListener("DOMContentLoaded", async function () {
-            checkAuth() {
-                const response = await fetch('https://auth.mydomain.com/api/getmeJSON', {
-                    method: 'GET',
-                    credentials: 'include' // CRITICAL: This sends the cookie
-                });
-                if (response.ok) {
-                    const data = await response.json();
-                    // Map the JSON response to your local variable
-                    // If UserProfile was a stringified JSON in the cookie, parse it here
-                    AppSession.profile = JSON.parse(data.UserProfile);
-                    AppSession.expiry = data.SessionExpiry;
-                    document.getElementById('SD-USER-META').innerHTML = AppSession.profile.CID;
-                    console.log("Session loaded for:", AppSession.profile.CID);
-                } else {
-                   window.location.href = `${APP_CONFIG.AUTH_URL}${APP_CONFIG.LOGIN_PAGE}`;
-                }
+            const response = await fetch('https://auth.mydomain.com/api/getmeJSON', {
+                method: 'GET',
+                credentials: 'include' // CRITICAL: This sends the cookie
+            });
+            if (response.ok) {
+                const data = await response.json();
+                // Map the JSON response to your local variable
+                // If UserProfile was a stringified JSON in the cookie, parse it here
+                AppSession.profile = JSON.parse(data.UserProfile);
+                AppSession.expiry = data.SessionExpiry;
+                document.getElementById('SD-USER-META').innerHTML = AppSession.profile.CID;
+                console.log("Session loaded for:", AppSession.profile.CID);
+            } else {
+               window.location.href = `${APP_CONFIG.AUTH_URL}${APP_CONFIG.LOGIN_PAGE}`;
             }
         });
         
