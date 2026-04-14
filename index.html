@@ -239,6 +239,7 @@
                 // Map the JSON response to your local variable
                 // If UserProfile was a stringified JSON in the cookie, parse it here
                 try {
+                    console.log(data.UwerProfile);
                     AppSession.profile = JSON.parse(data.UserProfile);
                     AppSession.expiry = data.SessionExpiry;
                     getUserProfile();
