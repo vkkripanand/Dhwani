@@ -248,7 +248,7 @@
             const bridgeToken = urlParams.get('bridgeToken');
             if (bridgeToken) {
                 // Call the API to "exchange" this token for the actual profile data
-                exchangeToken(bridgeToken);
+                await exchangeToken(bridgeToken);
                 const response = await fetch(`${APP_CONFIG.API_BASE_URL}/api/auth/getmeJSON`, {
                     method: 'GET',
                     credentials: 'include' // CRITICAL: This sends the cookie
