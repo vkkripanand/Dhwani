@@ -235,6 +235,14 @@
             })
                 .then(res => {
                     if (res.status === 200) {
+                        const data = res.json();
+                        console.log("Raw UserProfile string:", data.UserProfile);
+                        if (data.UserProfile) {
+                            // Since the cookie value is a JSON string, we must parse it to use it as an object
+                            const profileObj = JSON.parse(data.UserProfile); 
+                            console.log("CID:", profileObj.CID); 
+                            console.log("TokenTime:", profileObj.TokenTime);
+                        }
                         // API saw the cookie and returned user info
                         console.log("User is authenticated");
                         getUserProfile();
