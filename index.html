@@ -228,29 +228,49 @@
             INACTIVITY_LIMIT = AppSession.profile.Inactivity * 60 * 1000;
             console.log("Inactivity:", AppSession.profile.Inactivity);
         }
+        
+        async function exchangeToken(token) {
+          const response = await fetch (`${APP_CONFIG.API_BASE_URL}/api/auth/verifyToken?handshake=${token}`, {
+              credentials: 'include' // This ensures the API can see the original cookie
+          });
+          const data = await response.json();
+          if (data.Success) {
+              // Now you have the UserProfile in your JS state!
+              // You can use the JSON data directly.
+              console.log("Welcome:", data.UserProfile.CID);
+              // Clean up the URL so the token isn't visible to the user
+              window.history.replaceState({}, document.title, "/");
+          }
+        }
 
         document.addEventListener("DOMContentLoaded", async function () {
-           const response = await fetch(`${APP_CONFIG.API_BASE_URL}/api/auth/getmeJSON`, {
-                method: 'GET',
-                credentials: 'include' // CRITICAL: This sends the cookie
-            });
-            if (response.ok) {
-                const data = await response.json();
-                // Map the JSON response to your local variable
-                // If UserProfile was a stringified JSON in the cookie, parse it here
-                try {
-                    console.log(data.UserProfile);
-                    AppSession.profile = JSON.parse(data.UserProfile);
-                    AppSession.expiry = data.SessionExpiry;
-                    getUserProfile();
-                    getExpiryTime();
-                    recordActivity();
-                } catch (e) {
-                    console.log(e.message);
-                }
-            } else {
-               window.location.href = `${APP_CONFIG.AUTH_URL}${APP_CONFIG.LOGIN_PAGE}`;
-            }
+           const urlParams = new URLSearchParams(window.location.hash.replace('#', '?'));
+           const bridgeToken = urlParams.get('bridgeToken');
+           if (bridgeToken) {
+               // Call the API to "exchange" this token for the actual profile data
+               await exchangeToken(bridgeToken);
+               const response = await fetch(`${APP_CONFIG.API_BASE_URL}/api/auth/getmeJSON`, {
+                   method: 'GET',
+                   credentials: 'include' // CRITICAL: This sends the cookie
+               });
+               if (response.ok) {
+                   const data = await response.json();
+                   // Map the JSON response to your local variable
+                   // If UserProfile was a stringified JSON in the cookie, parse it here
+                   try {
+                       console.log(data.UserProfile);
+                       AppSession.profile = JSON.parse(data.UserProfile);
+                       AppSession.expiry = data.SessionExpiry;
+                       getUserProfile();
+                       getExpiryTime();
+                       recordActivity();
+                   } catch (e) {
+                       console.log(e.message);
+                   }
+               } else {
+                  window.location.href = `${APP_CONFIG.AUTH_URL}${APP_CONFIG.LOGIN_PAGE}`;
+               }
+           }
         });
 
         window.addEventListener('storage', (event) => {
