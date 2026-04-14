@@ -230,6 +230,10 @@
         }
 
         document.addEventListener("DOMContentLoaded", async function () {
+            let AppSession = {
+                profile: null,
+                expiry: null
+            };
             const response = await fetch('https://users.vividsol.in/api/auth/getmeJSON', {
                 method: 'GET',
                 credentials: 'include' // CRITICAL: This sends the cookie
