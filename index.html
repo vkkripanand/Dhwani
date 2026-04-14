@@ -160,7 +160,7 @@
             // Check if we need to refresh (1 minute before expiry)
             const sessionExpiry = parseInt(localStorage.getItem('session_expiry'));
             if (now > (sessionExpiry - REFRESH_BUFFER)) {
-                await refreshSession();
+                refreshSession();
             }
         }, 10000); // Check every 10 seconds
 
