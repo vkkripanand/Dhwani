@@ -191,15 +191,17 @@
         }
 
         function getCookie(name) {
-            let cookieArr = document.cookie.split(";");
-            for (let i = 0; i < cookieArr.length; i++) {
-                let cookiePair = cookieArr[i].split("=");
-                if (name == cookiePair[0].trim()) {
-                    return decodeURIComponent(cookiePair[1]);
-                }
+            // 1. Read all visible cookies
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            
+            if (parts.length === 2) {
+                const cookieValue = parts.pop().split(';').shift();
+                // 2. Decode the URL encoding (e.g., %3a becomes :)
+                return decodeURIComponent(cookieValue);
             }
             return null;
-        } 
+        }
 
         function getExpiryTime() {
             const expiryStr = getCookie("SessionExpiry");
