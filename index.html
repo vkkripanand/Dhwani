@@ -160,7 +160,7 @@
             // Check if we need to refresh (1 minute before expiry)
             const sessionExpiry = parseInt(localStorage.getItem('session_expiry'));
             if (now > (sessionExpiry - REFRESH_BUFFER)) {
-                refreshSession();
+                await refreshSession();
             }
         }, 10000); // Check every 10 seconds
 
@@ -230,7 +230,7 @@
         }
 
         document.addEventListener("DOMContentLoaded", async function () {
-            fetch(`${APP_CONFIG.API_BASE_URL}/api/auth/GetMeNew`, {
+            await fetch(`${APP_CONFIG.API_BASE_URL}/api/auth/GetMeNew`, {
                 credentials: 'include'
             })
                 .then(res => {
