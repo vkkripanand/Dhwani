@@ -238,11 +238,15 @@
                 const data = await response.json();
                 // Map the JSON response to your local variable
                 // If UserProfile was a stringified JSON in the cookie, parse it here
-                AppSession.profile = JSON.parse(data.UserProfile);
-                AppSession.expiry = data.SessionExpiry;
-                getUserProfile();
-                getExpiryTime();
-                recordActivity();
+                try {
+                    AppSession.profile = JSON.parse(data.UserProfile);
+                    AppSession.expiry = data.SessionExpiry;
+                    getUserProfile();
+                    getExpiryTime();
+                    recordActivity();
+                } catch (e) {
+                    console.log(e.message);
+                }
             } else {
                window.location.href = `${APP_CONFIG.AUTH_URL}${APP_CONFIG.LOGIN_PAGE}`;
             }
