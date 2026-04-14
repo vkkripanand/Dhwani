@@ -133,10 +133,6 @@
             LOGOUT_PAGE: "/logout"
         };
 
-        let AppSession = {
-            profile: null,
-            expiry: null
-        };
         let lastActivity = Date.now();
         let INACTIVITY_LIMIT = 2 * 60 * 1000; // 5 Minutes
         let TOKEN_LIFESPAN = 5 * 60 * 1000;   // 5 Minutes
@@ -204,75 +200,53 @@
              }
              return null;
          }
-
-        function getExpiryTime() {
-            const expiryStr = AppSession.expiry
-            if (expiryStr) {
-                const expiryTime = new Date(expiryStr).getTime();
-                const now = Date.now();
-                const timeLeft = expiryTime - now;
-
-                const expiryMillis = new Date(expiryStr).getTime();
-                localStorage.setItem('session_expiry', expiryMillis.toString());
-                const dateObject = new Date(expiryMillis);
-                const localString = dateObject.toLocaleString();
-                document.getElementById('SD-EXPIRY-META').innerHTML = localString;
-            }
-        }
-
-        function getUserProfile() {
-            console.log("CID:", AppSession.profile.CID);
-            document.getElementById('SD-USER-META').innerHTML = AppSession.profile.CID;
-            TOKEN_LIFESPAN = AppSession.profile.TokenTime * 60 * 1000;
-            console.log("TT:", AppSession.profile.TokenTime);
-            INACTIVITY_LIMIT = AppSession.profile.Inactivity * 60 * 1000;
-            console.log("Inactivity:", AppSession.profile.Inactivity);
-        }
+ 
+          function getExpiryTime() {
+              const expiryStr = getCookie("SessionExpiry");
+              if (expiryStr) {
+                  const expiryTime = new Date(expiryStr).getTime();
+                  const now = Date.now();
+                  const timeLeft = expiryTime - now;
         
-        async function exchangeToken(token) {
-          const response = await fetch (`${APP_CONFIG.API_BASE_URL}/api/auth/verifyToken?handshake=${token}`, {
-              credentials: 'include' // This ensures the API can see the original cookie
-          });
-          const data = await response.json();
-          if (data.Success) {
-              // Now you have the UserProfile in your JS state!
-              // You can use the JSON data directly.
-              console.log("Welcome:", data.UserProfile.CID);
-              // Clean up the URL so the token isn't visible to the user
-              window.history.replaceState({}, document.title, "/");
+                  const expiryMillis = new Date(expiryStr).getTime();
+                  localStorage.setItem('session_expiry', expiryMillis.toString());
+                  const dateObject = new Date(expiryMillis);
+                  const localString = dateObject.toLocaleString();
+                  document.getElementById('SD-EXPIRY-META').innerHTML = localString;
+              }
           }
-        }
-    
-        document.addEventListener("DOMContentLoaded", async function () {
-           const urlParams = new URLSearchParams(window.location);
-           const bridgeToken = urlParams.get('bridgeToken');
-           if (bridgeToken) {
-               // Call the API to "exchange" this token for the actual profile data
-               await exchangeToken(bridgeToken);
-           }
-           const response = await fetch(`${APP_CONFIG.API_BASE_URL}/api/auth/getmeJSON`, {
-               method: 'GET',
-               credentials: 'include' // CRITICAL: This sends the cookie
-           });
-           if (response.ok) {
-               const data = await response.json();
-               // Map the JSON response to your local variable
-               // If UserProfile was a stringified JSON in the cookie, parse it here
-               try {
-                   console.log(data.UserProfile);
-                   AppSession.profile = JSON.parse(data.UserProfile);
-                   AppSession.expiry = data.SessionExpiry;
-                   getUserProfile();
-                   getExpiryTime();
-                   recordActivity();
-               } catch (e) {
-                   console.log(e.message);
-               }
-           } else {
-              window.location.href = `${APP_CONFIG.AUTH_URL}${APP_CONFIG.LOGIN_PAGE}`;
-           }
-       });
-            
+        
+          function getUserProfile() {
+              const prefsRaw = getCookie("UserProfile");
+              if (prefsRaw) {
+                  const prefs = JSON.parse(prefsRaw);
+                  console.log("CID:", prefs.CID);
+                  TOKEN_LIFESPAN = prefs.TokenTime * 60 * 1000;
+                  console.log("TT:", prefs.TokenTime);
+                  INACTIVITY_LIMIT = prefs.Inactivity * 60 * 1000;
+                  console.log("Inactivity:", prefs.Inactivity);
+                  document.getElementById('SD-USER-META').innerHTML = prefs.CID;
+              }
+          }
+        
+          document.addEventListener("DOMContentLoaded", async function () {
+              fetch(`${APP_CONFIG.API_BASE_URL}/api/auth/GetMeNew`, {
+                  credentials: 'include'
+              })
+                  .then(res => {
+                      if (res.status === 200) {
+                          // API saw the cookie and returned user info
+                          console.log("User is authenticated");
+                          getUserProfile();
+                          getExpiryTime();
+                          recordActivity();
+                      } else {
+                          // No cookie or invalid cookie
+                          window.location.href = `${APP_CONFIG.AUTH_URL}${APP_CONFIG.LOGIN_PAGE}`;
+                      }
+                  });
+          });
+        
         window.addEventListener('storage', (event) => {
             if (event.key === 'last_activity') {
                 console.log("Activity detected in another tab! Resetting local timer.");
